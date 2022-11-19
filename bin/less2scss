@@ -1,32 +1,34 @@
 #!/usr/bin/env node
 
 "use strict";
-const commander = require('commander');
+const Command = require('commander').Command;
 const version = require('../package.json').version;
 const less2scss = require('../index.js').less2scss;
 
-commander
-    .version(version)
+const program = new Command()
+
+program
+    .name('less2scss')
     .description('This utility quickly converts all your less files to scss.')
+    .version(version, '-v, --version', 'Output the current version.')
+    .helpOption('-h, --help', 'Show this command summary.')
     .option('-s, --src <sourcePaths>', 'comma separated source paths')
     .option('-d, --dst <dstPath>', 'destination path')
     .option('-e, --exclude <excludePaths>', 'comma separated exclude paths')
-    .option('-r, --recursive', 'allow to recursively walk directories', false)
-    .parse(process.argv);
+    .option('-r, --recursive', 'allow to recursively walk directories', false);
+
+program.parse(process.argv);
 
 const exec = () => {
-    const opts = commander.opts();
+    const opts = program.opts();
     if (opts.src) {
-
         const src = opts.src,
             dst = opts.dst,
             recursive = opts.recursive,
             exclude = opts.exclude;
-
         less2scss(src, dst, recursive, exclude);
-
     } else {
-        commander.outputHelp();
+        program.outputHelp();
     }
 };
 
