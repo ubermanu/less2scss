@@ -6,12 +6,7 @@ const fs = require('fs'),
     colors = require('colors/safe'),
     replaceAll = require('string.prototype.replaceall');
 const ignore = require("ignore");
-
-const MESSAGE_PREFIX = {
-    INFO: colors.yellow('[INFO]'),
-    WARNING: colors.brightRed.bold('[WARNING]'),
-    ERROR: colors.red.bold('[ERROR]'),
-};
+const console = require('consola');
 
 const resolve = (...pathSegments) => {
     let pathResolved =  path.resolve(...pathSegments);
@@ -33,9 +28,8 @@ const less2scss = (src, dst, recursive, exclude) => {
         let lessFiles = [],
             destinationPath = dst;
 
-        console.info(`${MESSAGE_PREFIX.INFO} ${colors.yellow(`Recursive option is ${colors.yellow.bold(recursive ? 'ON' : 'OFF')}`)}`);
-        console.info(`${MESSAGE_PREFIX.INFO} ${colors.yellow(`Excluded paths: ${excludedPaths.length}`)}`);
-
+        console.info(`Recursive option is ${colors.yellow.bold(recursive ? 'ON' : 'OFF')}`);
+        console.info(`Excluded paths: ${excludedPaths.join(', ')}`);
 
         pathList.forEach(beginPath => {
 
@@ -89,15 +83,15 @@ const less2scss = (src, dst, recursive, exclude) => {
                 const scssContent = transformFileSync(src);
                 writeFile(src, scssContent, destinationPath, relativePath);
             });
-            console.log(`${MESSAGE_PREFIX.INFO} ${colors.green('Enjoy your SCSS files ;)')}`);
+            console.info(`${colors.green('Enjoy your SCSS files ;)')}`);
             console.log(`${colors.blue(`\n★ Pull requests and stars are always welcome.`)}`);
             console.log(`${colors.blue(`https://github.com/debba/less2scss`)}`);
 
         } else {
-            console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No LESS file found.')}`);
+            console.error('No LESS file found.');
         }
     } else {
-        console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No file entered.')}`);
+        console.error('No file entered.');
     }
 };
 
@@ -167,7 +161,7 @@ const transformSync = (content, file) => {
     const regexMathBuiltIn = new RegExp(`\\b(${mathBuiltInFunctions.join('|')})\\(`, 'g');
     if (regexMathBuiltIn.test(transformedContent)) {
         transformedContent = '@use "sass:math";\n' + replaceAll(transformedContent, regexMathBuiltIn, (match, p1, index, input) => {
-            console.log(`${MESSAGE_PREFIX.WARNING} There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file || '""' }}:${input.substring(0, index).split('\n').length + 1}`)
+            console.warn(`There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file || '""' }}:${input.substring(0, index).split('\n').length + 1}`)
             return `math.${match}`;
         });
     }
@@ -194,7 +188,7 @@ const writeFile = (file, scssContent, destinationPath, relativePath) => {
 
     fs.writeFileSync(outputFile, scssContent);
 
-    console.log(`${colors.yellow('[INFO]')} Finished writing to ${outputFile}`);
+    console.debug(`Finished writing to ${outputFile}`);
 };
 
 module.exports = {

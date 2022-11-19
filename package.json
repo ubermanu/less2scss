@@ -40,6 +40,7 @@
     "string.prototype.replaceall": "^1.0.5"
   },
   "devDependencies": {
-    "ava": "^5.1.0"
+    "ava": "^5.1.0",
+    "consola": "^2.15.3"
   }
 }
