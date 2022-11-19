@@ -1,7 +1,8 @@
-import test from 'ava';
+import { test } from 'uvu';
+import * as assert from 'uvu/assert';
 import { transformSync } from '../src/less2scss';
 
-test('Mixins should be transformed with correct arguments', (t) => {
+test('Mixins should be transformed with correct arguments', () => {
     const input = `
 .test {
     .mixin(@arg1, @arg2);
@@ -12,10 +13,10 @@ test('Mixins should be transformed with correct arguments', (t) => {
     @include mixin($arg1, $arg2);
 }`;
 
-    t.is(transformSync(input), expected);
+    assert.is(transformSync(input), expected);
 });
 
-test('Mixins declarations should be transformed', (t) => {
+test('Mixins declarations should be transformed', () => {
     const input = `
 .mixin(@arg1, @arg2) {
     color: @arg1;
@@ -29,5 +30,7 @@ test('Mixins declarations should be transformed', (t) => {
     background: $arg2;
 }`;
 
-    t.is(transformSync(input), expected);
+    assert.is(transformSync(input), expected);
 });
+
+test.run();
