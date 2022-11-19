@@ -1,5 +1,5 @@
-const test = require('ava');
-const transformSync = require('../index.js').transformSync;
+import test from 'ava';
+import { transformSync } from '../src/less2scss';
 
 test('Imports should be transformed and extension changed', (t) => {
     t.is(transformSync('@import "test.less";'), '@import "test.scss";');

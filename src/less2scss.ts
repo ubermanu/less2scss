@@ -1,12 +1,12 @@
-const fs = require('fs'),
-    path = require('path'),
-    mkdirp = require('mkdirp'),
-    glob = require('glob'),
-    os = require('os'),
-    colors = require('colors/safe'),
-    replaceAll = require('string.prototype.replaceall');
-const ignore = require('ignore');
-const console = require('consola');
+import fs from 'fs-extra';
+import path from 'path';
+import mkdirp from 'mkdirp';
+import glob from 'fast-glob';
+import os from 'os';
+import colors from 'colors';
+import replaceAll from 'string.prototype.replaceall';
+import ignore from 'ignore';
+import console from 'consola';
 
 const resolve = (...pathSegments) => {
     let pathResolved = path.resolve(...pathSegments);
@@ -18,7 +18,7 @@ const resolve = (...pathSegments) => {
     return pathResolved;
 };
 
-const less2scss = (src, dst, recursive, exclude) => {
+export const less2scss = (src, dst, recursive, exclude) => {
     if (src) {
         const pathList = src.split(','),
             excludedPaths =
@@ -52,7 +52,7 @@ const less2scss = (src, dst, recursive, exclude) => {
                             .sync(
                                 `${beginPath}/${recursive ? '**/*' : '*'}.less`,
                                 {
-                                    mark: true,
+                                    markDirectories: true,
                                     onlyFiles: true,
                                 }
                             )
@@ -103,12 +103,12 @@ const less2scss = (src, dst, recursive, exclude) => {
     }
 };
 
-const transformFileSync = (file) => {
+export const transformFileSync = (file) => {
     let content = fs.readFileSync(file, 'utf8');
     return transformSync(content, file);
 };
 
-const transformSync = (content, file) => {
+export const transformSync = (content, file = '') => {
     let transformedContent = content
         .replace(/\/less\//g, '/scss/')
         .replace(/\.less/g, '.scss')
@@ -243,10 +243,4 @@ const writeFile = (file, scssContent, destinationPath, relativePath) => {
     fs.writeFileSync(outputFile, scssContent);
 
     console.debug(`Finished writing to ${outputFile}`);
-};
-
-module.exports = {
-    less2scss,
-    transformFileSync,
-    transformSync,
 };

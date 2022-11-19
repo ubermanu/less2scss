@@ -1,9 +1,6 @@
-#!/usr/bin/env node
-
-'use strict';
-const Command = require('commander').Command;
-const version = require('../package.json').version;
-const less2scss = require('../index.js').less2scss;
+import { Command } from 'commander';
+import { version } from '../package.json' assert { type: 'json' };
+import { less2scss } from './less2scss';
 
 const program = new Command();
 

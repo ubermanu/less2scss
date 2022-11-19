@@ -1,5 +1,5 @@
-const test = require('ava');
-const transformSync = require('../index.js').transformSync;
+import test from 'ava';
+import { transformSync } from '../src/less2scss';
 
 test('Mixins should be transformed with correct arguments', (t) => {
     const input = `

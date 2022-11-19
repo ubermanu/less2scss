@@ -1,5 +1,5 @@
-const test = require('ava');
-const transformSync = require('../index.js').transformSync;
+import test from 'ava';
+import { transformSync } from '../src/less2scss';
 
 test('Variables should be correctly transformed', (t) => {
     t.is(transformSync('@color: #4D926F;'), '$color: #4D926F;');
