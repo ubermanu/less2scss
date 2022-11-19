@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-"use strict";
+'use strict';
 const Command = require('commander').Command;
 const version = require('../package.json').version;
 const less2scss = require('../index.js').less2scss;
 
-const program = new Command()
+const program = new Command();
 
 program
     .name('less2scss')

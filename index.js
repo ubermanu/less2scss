@@ -5,34 +5,36 @@ const fs = require('fs'),
     os = require('os'),
     colors = require('colors/safe'),
     replaceAll = require('string.prototype.replaceall');
-const ignore = require("ignore");
+const ignore = require('ignore');
 const console = require('consola');
 
 const resolve = (...pathSegments) => {
-    let pathResolved =  path.resolve(...pathSegments);
+    let pathResolved = path.resolve(...pathSegments);
 
     if (process.platform === 'win32') {
-        pathResolved = pathResolved.split(path.sep).join("/");
+        pathResolved = pathResolved.split(path.sep).join('/');
     }
 
     return pathResolved;
-}
-
+};
 
 const less2scss = (src, dst, recursive, exclude) => {
     if (src) {
-
         const pathList = src.split(','),
-            excludedPaths = exclude && exclude.length > 0 ? exclude.split(',') : [];
+            excludedPaths =
+                exclude && exclude.length > 0 ? exclude.split(',') : [];
 
         let lessFiles = [],
             destinationPath = dst;
 
-        console.info(`Recursive option is ${colors.yellow.bold(recursive ? 'ON' : 'OFF')}`);
+        console.info(
+            `Recursive option is ${colors.yellow.bold(
+                recursive ? 'ON' : 'OFF'
+            )}`
+        );
         console.info(`Excluded paths: ${excludedPaths.join(', ')}`);
 
-        pathList.forEach(beginPath => {
-
+        pathList.forEach((beginPath) => {
             beginPath && beginPath.trim();
 
             if (beginPath[0] === '~') {
@@ -43,50 +45,56 @@ const less2scss = (src, dst, recursive, exclude) => {
             let curPathType = fs.lstatSync(beginPath);
 
             if (curPathType.isDirectory()) {
-
                 let currLessFiles = ignore()
-                    .add(excludedPaths).filter(
-                        glob.sync(`${beginPath}/${recursive ? '**/*' : '*'}.less`, {
-                            mark: true,
-                            onlyFiles: true
-                        }).map(
-                            p => path.relative(beginPath, p)
-                        )
-                    ).map(
-                        lessFile => ({
-                            src: path.join(beginPath, lessFile),
-                            relativePath: lessFile
-                        })
+                    .add(excludedPaths)
+                    .filter(
+                        glob
+                            .sync(
+                                `${beginPath}/${recursive ? '**/*' : '*'}.less`,
+                                {
+                                    mark: true,
+                                    onlyFiles: true,
+                                }
+                            )
+                            .map((p) => path.relative(beginPath, p))
                     )
+                    .map((lessFile) => ({
+                        src: path.join(beginPath, lessFile),
+                        relativePath: lessFile,
+                    }));
 
                 lessFiles = [...lessFiles, ...currLessFiles];
-
             }
 
             if (curPathType.isFile()) {
-                lessFiles = [...lessFiles, {
-                    src: beginPath,
-                    relativePath: ''
-                }];
+                lessFiles = [
+                    ...lessFiles,
+                    {
+                        src: beginPath,
+                        relativePath: '',
+                    },
+                ];
             }
-
         });
 
-        lessFiles = lessFiles
-            .filter(
-                ({src}, index) => lessFiles.map(lessFile => lessFile.src).indexOf(src) === index
-            );
+        lessFiles = lessFiles.filter(
+            ({ src }, index) =>
+                lessFiles.map((lessFile) => lessFile.src).indexOf(src) === index
+        );
 
         if (lessFiles.length) {
-            lessFiles.forEach(file => {
-                const {src, relativePath} = file;
+            lessFiles.forEach((file) => {
+                const { src, relativePath } = file;
                 const scssContent = transformFileSync(src);
                 writeFile(src, scssContent, destinationPath, relativePath);
             });
             console.info(`${colors.green('Enjoy your SCSS files ;)')}`);
-            console.log(`${colors.blue(`\n★ Pull requests and stars are always welcome.`)}`);
+            console.log(
+                `${colors.blue(
+                    `\n★ Pull requests and stars are always welcome.`
+                )}`
+            );
             console.log(`${colors.blue(`https://github.com/debba/less2scss`)}`);
-
         } else {
             console.error('No LESS file found.');
         }
@@ -98,19 +106,20 @@ const less2scss = (src, dst, recursive, exclude) => {
 const transformFileSync = (file) => {
     let content = fs.readFileSync(file, 'utf8');
     return transformSync(content, file);
-}
+};
 
 const transformSync = (content, file) => {
-    let transformedContent = content.replace(/\/less\//g, '/scss/')
+    let transformedContent = content
+        .replace(/\/less\//g, '/scss/')
         .replace(/\.less/g, '.scss')
         .replace(/@/g, '$')
         .replace(/\%\((.*?)\);/g, function (all) {
             let arr = all.match(/argb\(.*?\)/g);
             if (arr instanceof Array) {
                 for (let i = 0, n = arr.length; i < n; i++) {
-                    arr[i] = arr[i].replace(/argb\(\$(.*?)\)/g, "${$1}");
+                    arr[i] = arr[i].replace(/argb\(\$(.*?)\)/g, '${$1}');
                 }
-                all = all.replace(/,argb\(.*?\)/g, "");
+                all = all.replace(/,argb\(.*?\)/g, '');
                 var i = -1;
                 all = all.replace(/\%d/g, function (al) {
                     i++;
@@ -122,7 +131,10 @@ const transformSync = (content, file) => {
         })
         .replace(/ e\(/g, ' unquote(')
         .replace(/\.([\w\-]*)\s*\((.*)\)\s*\{/g, '@mixin $1($2){')
-        .replace(/@mixin\s*([\w\-]*)\s*\((.*)\)\s*\{\s*\}/g, '// @mixin $1($2){}')
+        .replace(
+            /@mixin\s*([\w\-]*)\s*\((.*)\)\s*\{\s*\}/g,
+            '// @mixin $1($2){}'
+        )
         .replace(/@mixin\s*([\w\-]*)\s*\((.*);(.*)\)/g, function (all) {
             all = all.replace(/;/g, ',');
             return all;
@@ -134,54 +146,96 @@ const transformSync = (content, file) => {
             all = all.replace(/;/g, ',');
             return all;
         })
-        .replace(/\).*?;!important/, " !important)")
-        .replace(/\$(import|charset|media|font-face|page[\s:]|-ms-viewport|keyframes|supports|-webkit-keyframes|-moz-keyframes|-o-keyframes|-moz-document)/g, '@$1')
+        .replace(/\).*?;!important/, ' !important)')
+        .replace(
+            /\$(import|charset|media|font-face|page[\s:]|-ms-viewport|keyframes|supports|-webkit-keyframes|-moz-keyframes|-o-keyframes|-moz-document)/g,
+            '@$1'
+        )
         .replace(/\$\{/g, '#{$')
         .replace(/~("[^"]+")/g, 'unquote($1)')
-        .replace(/&:extend\((.*?)\)/g, "@extend $1")
-        .replace(/@extend\s*(.*?)\s*?all;/g, "@extend $1;")
+        .replace(/&:extend\((.*?)\)/g, '@extend $1')
+        .replace(/@extend\s*(.*?)\s*?all;/g, '@extend $1;')
         .replace(/([\W])spin\(/g, '$1adjust-hue(')
         .replace(/(\W)fade\(([^)]+?)% *\)/g, '$1rgba($2%/100.0%)')
         .replace(/(\W)fade\(/g, '$1rgba(')
         .replace(/~(\s*['"])/g, '$1')
-        .replace(/(.[\w\-]+?)&/g, "$1 &")
-        .replace(/#([\w\-]*)\s*\{([^\}]*@mixin[\s\S]*)\}/g, function (all, $1, $2) {
-            all = all.replace(/#[\w\-]*\s*\{([^\}]*@mixin[\s\S]*)\}/, "$1");
-            all = all.replace(/@mixin\s*([\w\-]*)/g, "@mixin " + $1 + "_$1");
-            return all;
-        })
-        .replace(/#([\w\-]*)\s*>\s@include\s([\w\-]*)\((.*)\);/g, "@include $1_$2($3);")
+        .replace(/(.[\w\-]+?)&/g, '$1 &')
+        .replace(
+            /#([\w\-]*)\s*\{([^\}]*@mixin[\s\S]*)\}/g,
+            function (all, $1, $2) {
+                all = all.replace(/#[\w\-]*\s*\{([^\}]*@mixin[\s\S]*)\}/, '$1');
+                all = all.replace(
+                    /@mixin\s*([\w\-]*)/g,
+                    '@mixin ' + $1 + '_$1'
+                );
+                return all;
+            }
+        )
+        .replace(
+            /#([\w\-]*)\s*>\s@include\s([\w\-]*)\((.*)\);/g,
+            '@include $1_$2($3);'
+        )
         .replace(/&(&+)/g, function (match, p1) {
-            return "&" + p1.replace(/&/g, "#{&}")
+            return '&' + p1.replace(/&/g, '#{&}');
         })
         .replace(/@import +\( *css *\) +url/g, '@import url');
 
     // rewrite some built-in functions
-    const mathBuiltInFunctions = ['pow', 'ceil', 'floor', 'round', 'min', 'max', 'abs', 'sqrt', 'sin', 'cos'];
-    const regexMathBuiltIn = new RegExp(`\\b(${mathBuiltInFunctions.join('|')})\\(`, 'g');
+    const mathBuiltInFunctions = [
+        'pow',
+        'ceil',
+        'floor',
+        'round',
+        'min',
+        'max',
+        'abs',
+        'sqrt',
+        'sin',
+        'cos',
+    ];
+    const regexMathBuiltIn = new RegExp(
+        `\\b(${mathBuiltInFunctions.join('|')})\\(`,
+        'g'
+    );
     if (regexMathBuiltIn.test(transformedContent)) {
-        transformedContent = '@use "sass:math";\n' + replaceAll(transformedContent, regexMathBuiltIn, (match, p1, index, input) => {
-            console.warn(`There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file || '""' }}:${input.substring(0, index).split('\n').length + 1}`)
-            return `math.${match}`;
-        });
+        transformedContent =
+            '@use "sass:math";\n' +
+            replaceAll(
+                transformedContent,
+                regexMathBuiltIn,
+                (match, p1, index, input) => {
+                    console.warn(
+                        `There is math built-in function "${colors.bold(
+                            p1
+                        )}" check if rewrite is correct.\nFile ${
+                            file || '""'
+                        }}:${input.substring(0, index).split('\n').length + 1}`
+                    );
+                    return `math.${match}`;
+                }
+            );
     }
 
     return transformedContent;
 };
 
 const writeFile = (file, scssContent, destinationPath, relativePath) => {
-
     let outputFile;
 
     if (destinationPath) {
-
-        const newPath = relativePath !== '' ? path.dirname(destinationPath + '/' + relativePath) : destinationPath;
+        const newPath =
+            relativePath !== ''
+                ? path.dirname(destinationPath + '/' + relativePath)
+                : destinationPath;
 
         if (!fs.existsSync(newPath)) {
             mkdirp.sync(newPath);
         }
 
-        outputFile = resolve(newPath, path.basename(file)).replace('.less', '.scss');
+        outputFile = resolve(newPath, path.basename(file)).replace(
+            '.less',
+            '.scss'
+        );
     } else {
         outputFile = file.replace('.less', '.scss');
     }
@@ -194,5 +248,5 @@ const writeFile = (file, scssContent, destinationPath, relativePath) => {
 module.exports = {
     less2scss,
     transformFileSync,
-    transformSync
+    transformSync,
 };

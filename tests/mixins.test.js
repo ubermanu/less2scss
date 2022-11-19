@@ -1,8 +1,7 @@
 const test = require('ava');
 const transformSync = require('../index.js').transformSync;
 
-test('Mixins should be transformed with correct arguments', t => {
-
+test('Mixins should be transformed with correct arguments', (t) => {
     const input = `
 .test {
     .mixin(@arg1, @arg2);
@@ -16,8 +15,7 @@ test('Mixins should be transformed with correct arguments', t => {
     t.is(transformSync(input), expected);
 });
 
-test('Mixins declarations should be transformed', t => {
-
+test('Mixins declarations should be transformed', (t) => {
     const input = `
 .mixin(@arg1, @arg2) {
     color: @arg1;
