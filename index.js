@@ -156,6 +156,7 @@ const replaceLess = file => {
         .replace(/&(&+)/g, function (match, p1) {
             return "&" + p1.replace(/&/g, "#{&}")
         })
+        .replace(/^\ *\&\s*when(.*)$/gm, '@if$1')
         .replace(/@import +\( *css *\) +url/g, '@import url');
 
     // rewrite some built-in functions
