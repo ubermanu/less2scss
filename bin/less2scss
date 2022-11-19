@@ -21,11 +21,8 @@ program.parse(process.argv);
 
 const exec = () => {
     const opts = program.opts();
-    if (opts.src) {
-        const src = opts.src,
-            dst = opts.dst,
-            recursive = opts.recursive,
-            exclude = opts.exclude;
+    const { src, dst, exclude, recursive } = opts;
+    if (src) {
         less2scss(src, dst, recursive, exclude);
     } else {
         program.outputHelp();
